@@ -1,5 +1,14 @@
 console.info("Function Learning");
 
+/* 3 jenis function : 
+  1. Declaration: function f() {}
+  2. Expression: const f = function() {}
+  3. Arrow: const f = () => {}
+*/
+// This Arrow
+const sapa = (nama) => console.log(`halo ${nama}`);
+sapa("nana");
+
 /*function bio (nama){
   console.log("halo, saya "+ nama +", senang berkenalan")
 };
