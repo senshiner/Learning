@@ -1,0 +1,116 @@
+db_tes=# \d menu
+                                   Table "public.menu"
+  Column   |          Type          | Collation | Nullable |           Default
+-----------+------------------------+-----------+----------+------------------------------
+ menu_id   | integer                |           | not null | generated always as identity
+ nama_item | character varying(100) |           | not null |
+ harga     | numeric(10,2)          |           | not null |
+ kategori  | character varying(50)  |           |          | 'Minuman'::character varying
+ rating    | integer                |           |          |
+Indexes:
+    "menu_pkey" PRIMARY KEY, btree (menu_id)
+Check constraints:
+    "menu_harga_check" CHECK (harga > 0::numeric)
+Referenced by:
+    TABLE "pesanan" CONSTRAINT "pesanan_menu_id_fkey" FOREIGN KEY (menu_id) REFERENCES menu(menu_id)
+
+db_tes=#
+
+db_tes=# \d pesanan
+                                           Table "public.pesanan"
+    Column     |          Type          | Collation | Nullable |                   Default
+---------------+------------------------+-----------+----------+---------------------------------------------
+ pesanan_id    | integer                |           | not null | nextval('pesanan_pesanan_id_seq'::regclass)
+ menu_id       | integer                |           | not null |
+ nama_customer | character varying(100) |           | not null |
+ jumlah        | integer                |           | not null | 1
+ tanggal_pesan | date                   |           |          | CURRENT_DATE
+Indexes:
+    "pesanan_pkey" PRIMARY KEY, btree (pesanan_id)
+Check constraints:
+    "pesanan_jumlah_check" CHECK (jumlah > 0)
+Foreign-key constraints:
+    "pesanan_menu_id_fkey" FOREIGN KEY (menu_id) REFERENCES menu(menu_id)
+
+db_tes=#
+
+db_tes=# CREATE TABLE menu (
+   menu_id INT PRIMARY KEY,
+   nama_item VARCHAR(100) NOT NULL,
+   harga DECIMAL(10,2) NOT NULL CHECK (harga > 0),
+   kategori VARCHAR(50) DEFAULT 'Minuman'
+);
+CREATE TABLE
+
+db_tes=# CREATE TABLE pesanan (
+    pesanan_id SERIAL PRIMARY KEY,
+    menu_id INT NOT NULL REFERENCES menu(menu_id),
+    nama_customer VARCHAR(100) NOT NULL,
+    jumlah INT NOT NULL DEFAULT 1 CHECK (jumlah > 0),
+    tanggal_pesan DATE DEFAULT CURRENT_DATE
+);
+CREATE TABLE
+
+db_tes=# ALTER TABLE menu
+ALTER COLUMN menu_id
+ADD GENERATED ALWAYS AS IDENTITY;
+ALTER TABLE
+db_tes=# INSERT INTO menu (nama_item, harga, kategori) VALUES
+('Es Teh Manis', 8000.00, 'Minuman'),
+('Nasi Goreng Spesial', 25000.00, 'Makanan'),
+('Kentang Goreng', 15000.00, 'Snack');
+INSERT 0 3
+
+db_tes=# select * from menu;
+ menu_id |      nama_item      |  harga   | kategori
+---------+---------------------+----------+----------
+       1 | Es Teh Manis        |  8000.00 | Minuman
+       2 | Nasi Goreng Spesial | 25000.00 | Makanan
+       3 | Kentang Goreng      | 15000.00 | Snack
+(3 rows)
+
+db_tes=# select * from pesanan;
+ pesanan_id | menu_id | nama_customer | jumlah | tanggal_pesan
+------------+---------+---------------+--------+---------------
+          1 |       2 | Sendi         |      4 | 2025-06-26
+          2 |       3 | Ucup          |      2 | 2025-06-26
+          3 |       1 | John          |      1 | 2025-06-26
+          4 |       3 | Doni          |      2 | 2025-06-26
+(4 rows)
+
+db_tes=# SELECT * FROM menu WHERE harga > 15000;
+ menu_id |      nama_item      |  harga   | kategori | rating
+---------+---------------------+----------+----------+--------
+       2 | Nasi Goreng Spesial | 25000.00 | Makanan  |
+(1 row)
+
+db_tes=# select SUM(pesanan.jumlah)
+from pesanan
+;
+ sum
+-----
+   9
+(1 row)
+
+db_tes=# select *
+db_tes-# from menu where rating is NULL;
+ menu_id |      nama_item      |  harga   | kategori | rating
+---------+---------------------+----------+----------+--------
+       1 | Es Teh Manis        |  8000.00 | Minuman  |
+       2 | Nasi Goreng Spesial | 25000.00 | Makanan  |
+       3 | Kentang Goreng      | 15000.00 | Snack    |
+(3 rows)
+
+db_tes=# SELECT menu.nama_item, pesanan.jumlah
+FROM pesanan
+JOIN menu ON pesanan.menu_id = menu.menu_id
+ORDER BY pesanan.jumlah DESC;
+      nama_item      | jumlah
+---------------------+--------
+ Nasi Goreng Spesial |      4
+ Kentang Goreng      |      2
+ Kentang Goreng      |      2
+ Es Teh Manis        |      1
+(4 rows)
+
+
